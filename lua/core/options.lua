@@ -65,7 +65,7 @@ opt.splitright = true
 -- Outros
 opt.mouse = 'a'
 opt.updatetime = 300
-opt.timeoutlen = 500
+opt.timeoutlen = 300
 opt.completeopt = "menu,menuone,noselect"
 
 -- Configurações visuais para diagnósticos (podem ser ajustadas pelo LSP)

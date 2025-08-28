@@ -175,30 +175,178 @@ return {
     end,
   },
 
+  -- Which-key: Menu de ajuda para keymaps
+  -- Configuração abrangente com mais de 50 keymaps organizados por categoria
+  -- Inclui ícones Unicode e emojis para melhor identificação visual
   {
     "folke/which-key.nvim",
     event = "VeryLazy",
     init = function()
       vim.o.timeout = true
-      vim.o.timeoutlen = 1000
+      vim.o.timeoutlen = 300
     end,
     opts = {
+      preset = "modern",
+      delay = 200,
+      expand = 1,
+      notify = false,
+      triggers = {
+        { "<auto>", mode = "nxso" },
+      },
+      spec = {
+        {
+          mode = { "n", "v" },
+          { "<leader>b", group = "󰓩 Buffers" },
+          { "<leader>d", group = "🔍 Diagnósticos" },
+          { "<leader>f", group = "📁 Arquivos" },
+          { "<leader>g", group = "󰊢 Git" },
+          { "<leader>h", group = "󰊢 Git Hunks" },
+          { "<leader>j", group = "☕ Java" },
+          { "<leader>l", group = "🔧 LSP" },
+          { "<leader>s", group = "🔍 Buscar" },
+          { "<leader>t", group = "🔧 Toggle" },
+          { "<leader>w", desc = "💾 Salvar arquivo" },
+          { "<leader>q", desc = "❌ Fechar janela" },
+          { "<leader>e", desc = "📂 Explorador" },
+        },
+      },
+      icons = {
+        breadcrumb = "»",
+        separator = "➜",
+        group = "+",
+        ellipsis = "…",
+        mappings = true,
+        rules = false,
+        colors = true,
+        keys = {
+          Up = " ",
+          Down = " ",
+          Left = " ",
+          Right = " ",
+          C = "󰘴 ",
+          M = "󰘵 ",
+          D = "󰘳 ",
+          S = "󰘶 ",
+          CR = "󰌑 ",
+          Esc = "󱊷 ",
+          ScrollWheelDown = "󱕐 ",
+          ScrollWheelUp = "󱕑 ",
+          NL = "󰌑 ",
+          BS = "󰁮",
+          Space = "󱁐 ",
+          Tab = "󰌒 ",
+          F1 = "󱊫",
+          F2 = "󱊬",
+          F3 = "󱊭",
+          F4 = "󱊮",
+          F5 = "󱊯",
+          F6 = "󱊰",
+          F7 = "󱊱",
+          F8 = "󱊲",
+          F9 = "󱊳",
+          F10 = "󱊴",
+          F11 = "󱊵",
+          F12 = "󱊶",
+        },
+      },
+      win = {
+        border = "rounded",
+        position = "bottom",
+        margin = { 1, 0, 1, 0 },
+        padding = { 1, 2, 1, 2 },
+        winblend = 0,
+        zindex = 1000,
+      },
       layout = {
-        height = {
-          max = 20
-        },
-        width = {
-          max = 80
-        },
+        width = { min = 20, max = 50 },
         spacing = 3,
-        align = "center",
+        align = "left",
       },
     },
     config = function(_, opts)
       local wk = require("which-key")
       wk.setup(opts)
-      -- Seus registros de atalhos aqui
-      -- Ex: wk.register({ ... })
+      
+      -- Registrar keymaps adicionais que podem não estar no spec
+      wk.add({
+        -- Geral
+        { "<leader>w", desc = "💾 Salvar arquivo" },
+        { "<leader>q", desc = "❌ Fechar janela" },
+        { "<leader>h", desc = "🔍 Limpar busca" },
+        { "<leader>e", desc = "📂 Explorador" },
+        
+        -- Buffers
+        { "<leader>bd", desc = "❌ Fechar buffer" },
+        
+        -- Telescope
+        { "<leader>ff", desc = "📄 Buscar arquivos" },
+        { "<leader>fg", desc = "🔍 Live grep" },
+        { "<leader>fb", desc = "📋 Listar buffers" },
+        { "<leader>fh", desc = "❓ Tags de ajuda" },
+        { "<leader>fo", desc = "📚 Arquivos recentes" },
+        { "<leader>fc", desc = "⌨️  Comandos" },
+        { "<leader>f;", desc = "📜 Histórico comandos" },
+        { "<leader>fk", desc = "🔑 Mapeamentos teclas" },
+        { "<leader>f/", desc = "🔍 Fuzzy find buffer" },
+        
+        -- LSP
+        { "<leader>rn", desc = "✏️  Renomear símbolo" },
+        { "<leader>ca", desc = "🔧 Ações de código" },
+        { "<leader>fm", desc = "🎨 Formatar código" },
+        { "<leader>de", desc = "🐛 Mostrar erros" },
+        { "<leader>D", desc = "📋 Símbolos documento" },
+        { "<leader>ds", desc = "🌐 Símbolos workspace" },
+        { "<leader>dl", desc = "🔍 Diagnósticos" },
+        
+        -- Navegação LSP (não-leader)
+        { "K", desc = "📖 Documentação (hover)" },
+        { "gd", desc = "🎯 Ir para definição" },
+        { "gD", desc = "🎯 Ir para declaração" },
+        { "gi", desc = "🔗 Ir para implementação" },
+        { "gr", desc = "🔍 Mostrar referências" },
+        { "gt", desc = "🏷️  Ir para tipo" },
+        { "[d", desc = "⬆️  Diagnóstico anterior" },
+        { "]d", desc = "⬇️  Próximo diagnóstico" },
+        
+        -- Git Hunks
+        { "<leader>hs", desc = "➕ Stage hunk", mode = { "n", "v" } },
+        { "<leader>hr", desc = "🔄 Reset hunk", mode = { "n", "v" } },
+        { "<leader>hS", desc = "➕ Stage buffer" },
+        { "<leader>hu", desc = "⏪ Undo stage hunk" },
+        { "<leader>hR", desc = "🔄 Reset buffer" },
+        { "<leader>hp", desc = "👁️  Preview hunk" },
+        { "<leader>hb", desc = "👤 Blame linha" },
+        { "<leader>htb", desc = "🔄 Toggle blame" },
+        { "<leader>hd", desc = "📊 Diff this" },
+        { "<leader>hD", desc = "📊 Diff this (HEAD)" },
+        { "[h", desc = "⬆️  Hunk anterior" },
+        { "]h", desc = "⬇️  Próximo hunk" },
+        
+        -- Git text objects
+        { "ih", desc = "🎯 Selecionar hunk", mode = { "o", "x" } },
+        
+        -- Java/JDTLS
+        { "<leader>jo", desc = "📦 Organizar imports" },
+        { "<leader>jt", desc = "🧪 Testar classe" },
+        { "<leader>jn", desc = "🧪 Testar método" },
+        { "<leader>je", desc = "📤 Extrair variável", mode = { "n", "v" } },
+        { "<leader>jc", desc = "📤 Extrair constante", mode = { "n", "v" } },
+        { "<leader>jf", desc = "🎨 Formatar código" },
+        { "<leader>jl", desc = "🧹 Limpar logs" },
+        
+        -- Toggles
+        { "<leader>td", desc = "👻 Toggle deleted" },
+        
+        -- Navegação entre buffers
+        { "<S-h>", desc = "⬅️  Buffer anterior" },
+        { "<S-l>", desc = "➡️  Próximo buffer" },
+        
+        -- Comentários 
+        { "gc", desc = "💬 Comentar/descomentar", mode = { "n", "v" } },
+        { "gcc", desc = "💬 Comentar linha atual" },
+        { "gbc", desc = "💬 Comentar bloco" },
+        { "gb", desc = "💬 Comentar bloco", mode = { "n", "v" } },
+      })
     end,
     keys = {
       {
@@ -206,7 +354,7 @@ return {
         function()
           require("which-key").show({ global = false })
         end,
-        desc = "Buffer Local Keymaps (which-key)",
+        desc = "📋 Keymaps buffer local",
       },
     },
   },
