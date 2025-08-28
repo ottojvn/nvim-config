@@ -8,9 +8,9 @@ return {
 			ui = {
 				border = "rounded", -- 'none', 'single', 'double', 'rounded', 'solid', 'shadow'
 			},
-			-- Corescheme para a UI do lazy.nvim durante a instalação/atualização
+			-- Colorscheme para a UI do lazy.nvim durante a instalação/atualização
 			install = {
-				colorscheme = { "catppuccin" }, -- Tenta usar catppuccin, fallback para habamax se não disponível
+				colorscheme = { "rose-pine" }, -- Usa rose-pine conforme configurado em theme.lua
 			},
 			-- Verificador de atualizações de plugins
 			checker = {

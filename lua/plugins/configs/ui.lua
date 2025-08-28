@@ -102,6 +102,51 @@ return {
     end,
   },
 
+  -- File Explorer
+  {
+    "nvim-tree/nvim-tree.lua",
+    cmd = { "NvimTreeToggle", "NvimTreeOpen", "NvimTreeFocus" },
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    opts = {
+      view = {
+        width = 30,
+        side = "left",
+      },
+      renderer = {
+        group_empty = true,
+        icons = {
+          show = {
+            file = true,
+            folder = true,
+            folder_arrow = true,
+            git = true,
+          },
+        },
+      },
+      filters = {
+        dotfiles = false,
+        git_ignored = false,
+      },
+      git = {
+        enable = true,
+        ignore = false,
+      },
+      actions = {
+        open_file = {
+          quit_on_open = false,
+          resize_window = true,
+        },
+      },
+    },
+    config = function(_, opts)
+      -- Desabilitar netrw para evitar conflitos
+      vim.g.loaded_netrw = 1
+      vim.g.loaded_netrwPlugin = 1
+      
+      require("nvim-tree").setup(opts)
+    end,
+  },
+
   -- Notificações (para cmdheight = 0 e melhor feedback visual)
   {
     "rcarriga/nvim-notify",

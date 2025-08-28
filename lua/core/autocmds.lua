@@ -1,3 +1,6 @@
+-- Configuração de auto comandos
+-- Comandos automáticos para melhorar a experiência do usuário
+
 local function augroup(name)
   return vim.api.nvim_create_augroup("user_" .. name, { clear = true })
 end

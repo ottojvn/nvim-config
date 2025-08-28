@@ -1,3 +1,6 @@
+-- Configuração de mapeamentos de teclas (keybindings)
+-- Mapeamentos globais e atalhos personalizados
+
 local map = vim.keymap.set
 
 -- Mapeamentos gerais
