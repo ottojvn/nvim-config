@@ -1,14 +1,14 @@
 -- Bootstrap lazy.nvim
+-- Configuração principal do Neovim com lazy.nvim
+
 -- Carregar configurações básicas
 local function safe_require(module)
-  local success, result = pcall(require, module)
+  local success, result = pcall(require, "core." .. module)
   if not success then
-    success, result = pcall(require, "core." .. module)
-    if not success then
-      print("Erro ao carregar módulo: " .. module)
-    end
+    print("Erro ao carregar módulo core." .. module .. ": " .. result)
+    return false
   end
-  return success
+  return true
 end
 
 -- Carregar módulos essenciais
@@ -35,21 +35,27 @@ vim.opt.rtp:prepend(lazypath)
 -- Em vez disso, saia do Neovim e inicie-o novamente.
 -- Ou use o comando :Lazy sync para atualizar os plugins.
 
--- Carregar plugins
-require("lazy").setup("plugins", {
-  checker = {
-    enabled = true,
-    notify = false,
-    frequency = 3600, -- verificar a cada hora
-  },
-  change_detection = { notify = false },
-  install = { colorscheme = { "rose-pine" } },
-  ui = { border = "rounded" },
-  performance = {
-    rtp = {
-      disabled_plugins = {
-        "netrwPlugin", "tohtml", 
+-- Carregar plugins com tratamento de erro
+local lazy_setup_ok, lazy_error = pcall(function()
+  require("lazy").setup("plugins", {
+    checker = {
+      enabled = true,
+      notify = false,
+      frequency = 3600, -- verificar a cada hora
+    },
+    change_detection = { notify = false },
+    install = { colorscheme = { "rose-pine" } },
+    ui = { border = "rounded" },
+    performance = {
+      rtp = {
+        disabled_plugins = {
+          "netrwPlugin", "tohtml", 
+        }
       }
     }
-  }
-})
+  })
+end)
+
+if not lazy_setup_ok then
+  print("Erro ao configurar plugins: " .. lazy_error)
+end

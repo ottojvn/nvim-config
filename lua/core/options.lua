@@ -1,10 +1,17 @@
+-- Configuração otimizada para Neovim
+-- Configurações de opções globais do editor
+
 local opt = vim.opt
 
--- Indentação
+-- Configurar tecla leader (deve ser definida o mais cedo possível)
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
+
+-- Indentação (configuração consistente)
 opt.expandtab = true
-opt.tabstop = 4
-opt.shiftwidth = 2
-opt.softtabstop = 4
+opt.tabstop = 2        -- Número de espaços que uma tab representa
+opt.shiftwidth = 2     -- Número de espaços para indentação automática
+opt.softtabstop = 2    -- Número de espaços ao usar tab no modo insert
 opt.autoindent = true
 opt.smartindent = true
 
@@ -18,13 +25,21 @@ opt.undofile = true
 opt.swapfile = false
 opt.undodir = vim.fn.stdpath('data') .. "/undodir"
 
--- Verificar e criar diretório de undo
-pcall(function()
+-- Verificar e criar diretório de undo com melhor tratamento de erro
+local function setup_undo_dir()
   local undodir = vim.fn.stdpath('data') .. "/undodir"
-  if vim.fn.isdirectory(undodir) == 0 then
-    vim.fn.mkdir(undodir, "p")
+  local stat = vim.loop.fs_stat(undodir)
+  
+  if not stat then
+    local success = vim.fn.mkdir(undodir, "p")
+    if success == 0 then
+      print("Erro: Não foi possível criar diretório de undo: " .. undodir)
+      opt.undofile = false -- Desabilitar se não conseguir criar
+    end
   end
-end)
+end
+
+setup_undo_dir()
 
 -- Interface
 opt.clipboard = "unnamedplus"
