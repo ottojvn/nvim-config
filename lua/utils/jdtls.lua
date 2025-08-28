@@ -7,6 +7,12 @@ function M.get_config()
   local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
   local workspace_dir = vim.fn.stdpath("data") .. "/jdtls-workspace/" .. project_name
 
+  -- Verificar se o JDTLS está instalado
+  if vim.fn.isdirectory(jdtls_path) == 0 then
+    vim.notify("JDTLS não encontrado. Execute :MasonInstall jdtls", vim.log.levels.WARN)
+    return nil
+  end
+
   -- Garantir que o diretório de workspace existe
   local util = require("utils")
   util.ensure_dir_exists(workspace_dir)
@@ -30,8 +36,9 @@ function M.get_config()
   
   -- Adicionar launcher do Eclipse
   local launcher_jar = vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
-  if launcher_jar ~= "" then
-    table.insert(bundles, launcher_jar)
+  if launcher_jar == "" then
+    vim.notify("JDTLS launcher não encontrado", vim.log.levels.ERROR)
+    return nil
   end
   
   -- Adicionar bundles de Java Debug e Java Test
@@ -58,16 +65,24 @@ function M.get_config()
     os_config = jdtls_path .. "/config_win"
   end
 
-  -- Opções de JVM
+  -- Verificar se a configuração do OS existe
+  if vim.fn.isdirectory(os_config) == 0 then
+    vim.notify("Configuração JDTLS para o OS não encontrada: " .. os_config, vim.log.levels.ERROR)
+    return nil
+  end
+
+  -- Opções de JVM otimizadas para reduzir problemas
   local java_opts = {
     "java",
     "-Declipse.application=org.eclipse.jdt.ls.core.application",
     "-Dosgi.bundles.defaultStartLevel=4",
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
     "-Dlog.protocol=false",     -- Reduzir logs de protocolo
-    "-Dlog.level=WARNING",      -- Mudar de ALL para WARNING
-    "-Xms1g",
-    "-Xmx4g", -- Aumentar memória máxima para 4GB
+    "-Dlog.level=ERROR",        -- Apenas erros no log
+    "-Xms512m",                 -- Reduzir memória inicial
+    "-Xmx2g",                   -- Reduzir memória máxima para 2GB
+    "-XX:+UseG1GC",             -- Usar coletor G1 para melhor performance
+    "-XX:+UseStringDeduplication",
     "--add-modules=ALL-SYSTEM",
     "--add-opens", "java.base/java.util=ALL-UNNAMED",
     "--add-opens", "java.base/java.lang=ALL-UNNAMED",

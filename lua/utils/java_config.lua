@@ -1,29 +1,42 @@
 -- Configuração para Java
 local M = {}
 
--- Configurações do formatador (usando apenas IntelliJ)
-M.formatter = {
-  profile = "IntelliJIDEA",
-  file = "eclipse-java-intellij-style.xml",
-  line_length = 120
+-- Configurações do formatador IntelliJ (inline, sem XML)
+M.formatter_settings = {
+  -- Configurações básicas de formatação IntelliJ
+  ["org.eclipse.jdt.core.formatter.tabulation.char"] = "space",
+  ["org.eclipse.jdt.core.formatter.tabulation.size"] = "4",
+  ["org.eclipse.jdt.core.formatter.use_tabs_only_for_leading_indentations"] = "false",
+  ["org.eclipse.jdt.core.formatter.lineSplit"] = "120",
+  
+  -- Chaves e blocos (IntelliJ style)
+  ["org.eclipse.jdt.core.formatter.brace_position_for_block"] = "end_of_line",
+  ["org.eclipse.jdt.core.formatter.brace_position_for_type_declaration"] = "end_of_line",
+  ["org.eclipse.jdt.core.formatter.brace_position_for_method_declaration"] = "end_of_line",
+  ["org.eclipse.jdt.core.formatter.brace_position_for_constructor_declaration"] = "end_of_line",
+  ["org.eclipse.jdt.core.formatter.brace_position_for_enum_declaration"] = "end_of_line",
+  ["org.eclipse.jdt.core.formatter.brace_position_for_annotation_type_declaration"] = "end_of_line",
+  
+  -- Espaçamento (IntelliJ style)
+  ["org.eclipse.jdt.core.formatter.insert_space_before_opening_brace_in_block"] = "insert",
+  ["org.eclipse.jdt.core.formatter.insert_space_before_opening_brace_in_method_declaration"] = "insert",
+  ["org.eclipse.jdt.core.formatter.insert_space_before_opening_brace_in_type_declaration"] = "insert",
+  ["org.eclipse.jdt.core.formatter.insert_space_after_comma_in_method_declaration_parameters"] = "insert",
+  ["org.eclipse.jdt.core.formatter.insert_space_after_comma_in_method_invocation_arguments"] = "insert",
+  
+  -- Quebras de linha
+  ["org.eclipse.jdt.core.formatter.blank_lines_before_method"] = "1",
+  ["org.eclipse.jdt.core.formatter.blank_lines_before_field"] = "0",
+  ["org.eclipse.jdt.core.formatter.blank_lines_before_first_class_body_declaration"] = "0",
+  
+  -- Comentários
+  ["org.eclipse.jdt.core.formatter.comment.line_length"] = "120",
+  ["org.eclipse.jdt.core.formatter.comment.format_block_comments"] = "true",
+  ["org.eclipse.jdt.core.formatter.comment.format_javadoc_comments"] = "true"
 }
 
 -- Inicialização das configurações Java
 function M.setup()
-  -- Verificar diretório de formatadores
-  local format_dir = vim.fn.stdpath("config") .. "/formatters"
-  local style_file = format_dir .. "/" .. M.formatter.file
-  
-  -- Criar diretório se não existir
-  if vim.fn.isdirectory(format_dir) == 0 then
-    vim.fn.mkdir(format_dir, "p")
-  end
-  
-  -- Verificar se arquivo de estilo existe
-  if vim.fn.filereadable(style_file) == 0 then
-    vim.notify("Arquivo de estilo Java não encontrado: " .. style_file, vim.log.levels.WARN)
-  end
-
   -- Limpar logs antigos
   M.clean_logs()
   
@@ -56,14 +69,11 @@ function M.clean_logs()
   end
 end
 
--- Obter configurações de formatação
+-- Obter configurações de formatação (inline, sem arquivos XML)
 function M.get_formatter_config()
   return {
     enabled = true,
-    settings = {
-      url = vim.fn.stdpath("config") .. "/formatters/" .. M.formatter.file,
-      profile = M.formatter.profile
-    }
+    settings = M.formatter_settings
   }
 end
 
