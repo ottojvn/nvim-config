@@ -1,1 +1,0 @@
-mkdir -p /home/ottojvn/.local/share/chezmoi/private_dot_config/nvim/formatters

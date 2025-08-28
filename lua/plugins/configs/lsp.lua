@@ -179,6 +179,12 @@ return {
           if jdtls_ok then
             local config = jdtls_util.get_config()
             
+            -- Verificar se a configuração é válida
+            if not config then
+              vim.notify("Não foi possível obter configuração JDTLS válida", vim.log.levels.WARN)
+              return
+            end
+            
             -- Iniciar o JDTLS
             local jdtls_ok, jdtls = pcall(require, "jdtls")
             if jdtls_ok then
@@ -202,9 +208,19 @@ return {
                 end 
               end, "Limpar logs")
               
-              -- Iniciar o JDTLS
-              jdtls.start_or_attach(config)
+              -- Iniciar o JDTLS com tratamento de erro
+              local start_ok, start_err = pcall(function()
+                jdtls.start_or_attach(config)
+              end)
+              
+              if not start_ok then
+                vim.notify("Erro ao iniciar JDTLS: " .. start_err, vim.log.levels.ERROR)
+              end
+            else
+              vim.notify("Plugin nvim-jdtls não encontrado", vim.log.levels.WARN)
             end
+          else
+            vim.notify("Não foi possível carregar configuração JDTLS", vim.log.levels.WARN)
           end
         end,
       })

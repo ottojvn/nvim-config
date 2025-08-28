@@ -28,7 +28,7 @@ opt.undodir = vim.fn.stdpath('data') .. "/undodir"
 -- Verificar e criar diretório de undo com melhor tratamento de erro
 local function setup_undo_dir()
   local undodir = vim.fn.stdpath('data') .. "/undodir"
-  local stat = vim.loop.fs_stat(undodir)
+  local stat = vim.uv.fs_stat(undodir)
   
   if not stat then
     local success = vim.fn.mkdir(undodir, "p")

@@ -10,7 +10,7 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-NVIM_CONFIG="/home/ottojvn/.config/nvim"
+NVIM_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
 NVIM_LUA="$NVIM_CONFIG/lua"
 
 echo -e "${BLUE}=== Corrigindo estrutura de diretórios Neovim ===${NC}"
@@ -86,7 +86,7 @@ safe_require("autocmds")
 
 -- Instalar e configurar gerenciador de plugins
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
     "git",
     "clone",

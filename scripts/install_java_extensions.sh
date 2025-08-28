@@ -2,7 +2,7 @@
 
 # Script de instalação das extensões Java (deprecated)
 # Este script foi substituído pela instalação automática via Lazy.nvim
-# Veja o arquivo: /home/ottojvn/.config/nvim/lua/plugins/configs/java_extensions.lua
+# Veja o arquivo: lua/plugins/configs/java_extensions.lua
 
 echo "Este script está depreciado!"
 echo "As extensões Java Debug e Test agora são instaladas automaticamente pelo gerenciador de plugins Lazy.nvim."

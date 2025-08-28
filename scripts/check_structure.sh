@@ -10,7 +10,7 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-NVIM_CONFIG="/home/ottojvn/.config/nvim"
+NVIM_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
 
 echo -e "${BLUE}=== Verificando estrutura de diretórios do Neovim ===${NC}"
 
