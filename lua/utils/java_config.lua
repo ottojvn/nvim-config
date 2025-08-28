@@ -45,9 +45,13 @@ function M.setup()
   log_manager.log_filters["jdtls"] = {
     patterns = {
       "WARNING: Using incubator modules:",
+      "jdk%.incubator%.vector",
       "org.apache.aries.spifly.BaseActivator",
       "INFORMAÇÕES: Registered provider",
-      "ago%.%s+%d+,%s+%d+%s+%d+:%d+:%d+"
+      "INFO: Registered provider",
+      "ago%.%s+%d+,%s+%d+%s+%d+:%d+:%d+",
+      "Logback ServiceProvider",
+      "BaseActivator log"
     }
   }
 end

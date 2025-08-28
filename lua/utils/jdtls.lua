@@ -26,9 +26,11 @@ function M.get_config()
   end
   
   local is_java_17_plus = false
+  local is_java_21_plus = false
   if java_version then
     local major_version = tonumber(java_version:match("^(%d+)"))
     is_java_17_plus = major_version and major_version >= 17
+    is_java_21_plus = major_version and major_version >= 21
   end
   
   -- Configurar bundles para debug e testes
@@ -83,6 +85,10 @@ function M.get_config()
     "-Xmx2g",                   -- Reduzir memória máxima para 2GB
     "-XX:+UseG1GC",             -- Usar coletor G1 para melhor performance
     "-XX:+UseStringDeduplication",
+    -- Suprimir warnings de módulos incubator para evitar exit code 13
+    "-XX:+UnlockExperimentalVMOptions",
+    "-XX:+IgnoreUnrecognizedVMOptions",
+    "-Djava.awt.headless=true",
     "--add-modules=ALL-SYSTEM",
     "--add-opens", "java.base/java.util=ALL-UNNAMED",
     "--add-opens", "java.base/java.lang=ALL-UNNAMED",
@@ -99,10 +105,20 @@ function M.get_config()
     table.insert(java_opts, "--add-opens")
     table.insert(java_opts, "java.base/java.net=ALL-UNNAMED")
   end
+  
+  -- Adicionar flags específicas para Java 21+ (incubator modules)
+  if is_java_21_plus then
+    table.insert(java_opts, "--enable-preview")
+    table.insert(java_opts, "--add-modules")
+    table.insert(java_opts, "jdk.incubator.vector")
+  end
 
-      -- Adicionar configurações de log para reduzir mensagens desnecessárias
-    table.insert(java_opts, "-Dorg.slf4j.simpleLogger.defaultLogLevel=error")
-    table.insert(java_opts, "-Dorg.eclipse.jdt.core.compiler.problem.suppressWarnings=enabled")
+  -- Adicionar configurações de log para reduzir mensagens desnecessárias
+  table.insert(java_opts, "-Dorg.slf4j.simpleLogger.defaultLogLevel=error")
+  table.insert(java_opts, "-Dorg.eclipse.jdt.core.compiler.problem.suppressWarnings=enabled")
+  
+  -- Suprimir warnings específicos que causam exit code 13  
+  table.insert(java_opts, "-Djdk.incubator.vector.VECTOR_ACCESS_OOB_CHECK=0")
 
     -- Completar as opções
   table.insert(java_opts, "-jar")
