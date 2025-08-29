@@ -212,7 +212,7 @@ return {
           map("v", "<leader>jc", function() jdtls.extract_constant(true) end, "Extrair constante")
           map("n", "<leader>jf", function() vim.lsp.buf.format({ async = true }) end, "Formatar código")
           
-          -- Iniciar o JDTLS com tratamento de erro simples
+          -- Iniciar o JDTLS com tratamento de erro melhorado
           local start_ok, start_err = pcall(function()
             jdtls.start_or_attach(config)
           end)
@@ -221,17 +221,38 @@ return {
             local error_msg = "Erro ao iniciar JDTLS: " .. tostring(start_err)
             vim.notify(error_msg, vim.log.levels.ERROR)
             
-            -- Sugestões básicas para erros comuns
-            if string.find(tostring(start_err), "exit code 13") then
-              vim.notify("Sugestão: Verifique a versão do Java. Tente :MasonInstall jdtls para reinstalar.", vim.log.levels.INFO)
-            elseif string.find(tostring(start_err), "launcher") then
-              vim.notify("Sugestão: Execute :MasonInstall jdtls para instalar o JDTLS.", vim.log.levels.INFO)
+            -- Diagnósticos específicos para erros comuns
+            local err_str = tostring(start_err)
+            if string.find(err_str, "exit code 13") then
+              vim.notify("JDTLS falhou com exit code 13 (problema na JVM)", vim.log.levels.ERROR)
+              vim.notify("Soluções possíveis:", vim.log.levels.INFO)
+              vim.notify("1. Verifique se Java 11+ está instalado: java -version", vim.log.levels.INFO)
+              vim.notify("2. Reinstale JDTLS: :MasonUninstall jdtls && :MasonInstall jdtls", vim.log.levels.INFO)
+              vim.notify("3. Limpe workspace: rm -rf ~/.local/share/nvim/jdtls-workspace", vim.log.levels.INFO)
+            elseif string.find(err_str, "launcher") then
+              vim.notify("Launcher JAR não encontrado - reinstale JDTLS: :MasonInstall jdtls", vim.log.levels.INFO)
+            elseif string.find(err_str, "java") and string.find(err_str, "not found") then
+              vim.notify("Java não encontrado no PATH. Instale Java 11+ e adicione ao PATH.", vim.log.levels.INFO)
+            elseif string.find(err_str, "workspace") then
+              vim.notify("Problema com workspace. Tente limpar: rm -rf ~/.local/share/nvim/jdtls-workspace", vim.log.levels.INFO)
+            else
+              vim.notify("Erro desconhecido. Verifique logs em ~/.local/state/nvim/lsp.log", vim.log.levels.INFO)
             end
           else
-            vim.notify("JDTLS iniciado com sucesso para " .. project_name, vim.log.levels.DEBUG)
+            vim.notify("JDTLS iniciado com sucesso para " .. project_name, vim.log.levels.INFO)
           end
         end,
       })
+      
+      -- Comando para diagnosticar problemas do JDTLS
+      vim.api.nvim_create_user_command("JdtlsDiagnose", function()
+        local jdtls_ok, jdtls_util = pcall(require, "utils.jdtls")
+        if jdtls_ok and jdtls_util.diagnose then
+          jdtls_util.diagnose()
+        else
+          vim.notify("Não foi possível carregar diagnóstico JDTLS", vim.log.levels.ERROR)
+        end
+      end, { desc = "Diagnosticar problemas do JDTLS" })
     end,
   },
 }
