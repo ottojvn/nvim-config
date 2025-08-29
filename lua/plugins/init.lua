@@ -18,6 +18,10 @@ return {
 				notify = false,       -- Não notificar sobre atualizações na inicialização (pode ser verificado com :Lazy)
 				frequency = 3600 * 6, -- Verificar a cada 6 horas (em segundos)
 			},
+			-- Desabilitar suporte a luarocks (elimina warnings do checkhealth)
+			rocks = {
+				enabled = false, -- Nenhum plugin atual requer luarocks
+			},
 			-- Otimizações de performance
 			performance = {
 				rtp = {

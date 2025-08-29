@@ -46,6 +46,9 @@ local lazy_setup_ok, lazy_error = pcall(function()
     change_detection = { notify = false },
     install = { colorscheme = { "rose-pine" } },
     ui = { border = "rounded" },
+    rocks = {
+      enabled = false, -- Desabilitar suporte a luarocks (não é necessário para os plugins atuais)
+    },
     performance = {
       rtp = {
         disabled_plugins = {
