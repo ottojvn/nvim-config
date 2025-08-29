@@ -41,19 +41,26 @@ function M.setup()
   M.clean_logs()
   
   -- Configurar filtros de log específicos para Java
-  local log_manager = require("utils.lsp_log_manager")
-  log_manager.log_filters["jdtls"] = {
-    patterns = {
-      "WARNING: Using incubator modules:",
-      "jdk%.incubator%.vector",
-      "org.apache.aries.spifly.BaseActivator",
-      "INFORMAÇÕES: Registered provider",
-      "INFO: Registered provider",
-      "ago%.%s+%d+,%s+%d+%s+%d+:%d+:%d+",
-      "Logback ServiceProvider",
-      "BaseActivator log"
+  local log_manager_ok, log_manager = pcall(require, "utils.lsp_log_manager")
+  if log_manager_ok then
+    log_manager.log_filters["jdtls"] = {
+      patterns = {
+        "WARNING: Using incubator modules:",
+        "jdk%.incubator%.vector",
+        "org.apache.aries.spifly.BaseActivator",
+        "INFORMAÇÕES: Registered provider",
+        "INFO: Registered provider",
+        "ago%.%s+%d+,%s+%d+%s+%d+:%d+:%d+",
+        "Logback ServiceProvider",
+        "BaseActivator log",
+        -- Adicionar mais padrões para suprimir warnings de módulos incubator
+        "incubator modules",
+        "incubator%.vector",
+        "module warning",
+        "LogbackServiceProvider"
+      }
     }
-  }
+  end
 end
 
 -- Limpar logs antigos
