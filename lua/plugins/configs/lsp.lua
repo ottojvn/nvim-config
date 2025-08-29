@@ -231,6 +231,22 @@ return {
         }
       })
       
+      -- Autocmd para garantir que JDTLS inicie automaticamente em arquivos Java
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "java",
+        callback = function()
+          -- Verificar se o JDTLS já está anexado
+          local clients = vim.lsp.get_clients({ name = "jdtls" })
+          if #clients == 0 then
+            -- Tentar iniciar o JDTLS se não estiver rodando
+            vim.schedule(function()
+              vim.cmd("LspStart jdtls")
+            end)
+          end
+        end,
+        desc = "Iniciar JDTLS automaticamente para arquivos Java"
+      })
+      
       -- Mapeamentos específicos para JDTLS quando anexado
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(ev)
