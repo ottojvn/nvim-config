@@ -89,9 +89,15 @@ function M.get_config()
     "-XX:+UnlockExperimentalVMOptions",
     "-XX:+IgnoreUnrecognizedVMOptions",
     "-Djava.awt.headless=true",
+    -- Suprimir todos os warnings de módulos para evitar exit code 13
     "--add-modules=ALL-SYSTEM",
     "--add-opens", "java.base/java.util=ALL-UNNAMED",
     "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+    -- Flags adicionais para suprimir warnings de sistema de módulos
+    "-Dsun.util.logging.disableCallerCheck=true",
+    "-Dfile.encoding=UTF-8",
+    -- Desabilitar warnings específicos que causam problemas
+    "-Djdk.lang.Process.launchMechanism=vfork",
   }
 
   -- Adicionar flags específicas para Java 17+
@@ -104,6 +110,11 @@ function M.get_config()
     table.insert(java_opts, "java.base/java.util.concurrent=ALL-UNNAMED")
     table.insert(java_opts, "--add-opens")
     table.insert(java_opts, "java.base/java.net=ALL-UNNAMED")
+    -- Flags adicionais para Java 17+ para evitar warnings de módulos
+    table.insert(java_opts, "--add-opens")
+    table.insert(java_opts, "java.base/sun.nio.ch=ALL-UNNAMED")
+    table.insert(java_opts, "--add-opens")
+    table.insert(java_opts, "java.desktop/sun.awt=ALL-UNNAMED")
   end
   
   -- Adicionar configurações de log para reduzir mensagens desnecessárias
@@ -118,6 +129,10 @@ function M.get_config()
   if is_java_21_plus then
     -- Suprimir warnings de módulos incubator sem habilitá-los
     table.insert(java_opts, "-Xlog:module=off")
+    table.insert(java_opts, "-XX:+IgnoreUnrecognizedVMOptions")
+    -- Flags específicas para Java 21+
+    table.insert(java_opts, "--add-opens")
+    table.insert(java_opts, "java.base/jdk.internal.misc=ALL-UNNAMED")
   end
 
     -- Completar as opções

@@ -59,18 +59,21 @@ return {
       require("neodev").setup({})
       
       -- Configurar handlers globais para o LSP
-      if package.loaded["utils.lsp_handlers"] then
-        require("utils.lsp_handlers").enhance_handlers()
+      local lsp_handlers_ok, lsp_handlers = pcall(require, "utils.lsp_handlers")
+      if lsp_handlers_ok and lsp_handlers.enhance_handlers then
+        lsp_handlers.enhance_handlers()
       end
       
       -- Configurar gerenciador de logs
-      if package.loaded["utils.lsp_log_manager"] then
-        require("utils.lsp_log_manager").setup()
+      local log_manager_ok, log_manager = pcall(require, "utils.lsp_log_manager")
+      if log_manager_ok and log_manager.setup then
+        log_manager.setup()
       end
       
       -- Configurar filtros de log
-      if package.loaded["utils.lsp_log_filter"] then
-        require("utils.lsp_log_filter").setup()
+      local log_filter_ok, log_filter = pcall(require, "utils.lsp_log_filter")
+      if log_filter_ok and log_filter.setup then
+        log_filter.setup()
       end
 
       -- Diagnósticos
@@ -161,7 +164,12 @@ return {
           end
         end
         
-        print("Aviso: mason-lspconfig não encontrado ou setup_handlers indisponível. Usando configuração manual.")
+        -- Usar vim.notify ao invés de print para melhor consistência
+        if not status_ok then
+          vim.notify("Mason-lspconfig não encontrado. Usando configuração manual dos servidores LSP.", vim.log.levels.WARN)
+        else
+          vim.notify("setup_handlers não disponível no mason-lspconfig. Usando configuração manual.", vim.log.levels.WARN)
+        end
       end
 
       -- Configuração para Java
@@ -178,6 +186,7 @@ return {
           local jdtls_ok, jdtls_util = pcall(require, "utils.jdtls")
           if jdtls_ok then
             local config = jdtls_util.get_config()
+            local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
             
             -- Verificar se a configuração é válida
             if not config then
@@ -208,13 +217,23 @@ return {
                 end 
               end, "Limpar logs")
               
-              -- Iniciar o JDTLS com tratamento de erro
+              -- Iniciar o JDTLS com tratamento de erro melhorado
               local start_ok, start_err = pcall(function()
                 jdtls.start_or_attach(config)
               end)
               
               if not start_ok then
-                vim.notify("Erro ao iniciar JDTLS: " .. start_err, vim.log.levels.ERROR)
+                local error_msg = "Erro ao iniciar JDTLS: " .. tostring(start_err)
+                vim.notify(error_msg, vim.log.levels.ERROR)
+                
+                -- Adicionar sugestões de solução se for um erro comum
+                if string.find(tostring(start_err), "exit code 13") then
+                  vim.notify("Sugestão: Verifique a versão do Java e configurações de módulos. Tente executar :MasonInstall jdtls para reinstalar.", vim.log.levels.INFO)
+                elseif string.find(tostring(start_err), "launcher") then
+                  vim.notify("Sugestão: JDTLS pode não estar instalado corretamente. Execute :MasonInstall jdtls", vim.log.levels.INFO)
+                end
+              else
+                vim.notify("JDTLS iniciado com sucesso para " .. project_name, vim.log.levels.INFO)
               end
             else
               vim.notify("Plugin nvim-jdtls não encontrado", vim.log.levels.WARN)
