@@ -211,13 +211,11 @@ return {
         end
       end
 
-      -- Configuração para Java (simplificada seguindo recomendações nvim-jdtls README)
-      -- Usando abordagem via lsp.config conforme documentação oficial
-      vim.lsp.config("jdtls", {
+      -- Configuração para Java usando lspconfig (mais compatível)
+      lspconfig.jdtls.setup({
+        capabilities = capabilities,
         cmd = { "jdtls" }, -- Requer jdtls no PATH (instalado via Mason)
-        root_dir = function(fname)
-          return vim.fs.root(fname, {'gradlew', '.git', 'mvnw', 'pom.xml', 'build.gradle'})
-        end,
+        root_dir = lspconfig.util.root_pattern('gradlew', '.git', 'mvnw', 'pom.xml', 'build.gradle'),
         settings = {
           java = {
             eclipse = { downloadSources = true },
@@ -233,8 +231,21 @@ return {
         }
       })
       
-      -- Habilitar jdtls para arquivos Java
-      vim.lsp.enable("jdtls")
+      -- Autocmd para garantir que JDTLS inicie automaticamente em arquivos Java
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "java",
+        callback = function()
+          -- Verificar se o JDTLS já está anexado
+          local clients = vim.lsp.get_clients({ name = "jdtls" })
+          if #clients == 0 then
+            -- Tentar iniciar o JDTLS se não estiver rodando
+            vim.schedule(function()
+              vim.cmd("LspStart jdtls")
+            end)
+          end
+        end,
+        desc = "Iniciar JDTLS automaticamente para arquivos Java"
+      })
       
       -- Mapeamentos específicos para JDTLS quando anexado
       vim.api.nvim_create_autocmd("LspAttach", {

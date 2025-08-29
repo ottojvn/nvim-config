@@ -252,7 +252,6 @@ return {
       win = {
         border = "rounded",
         position = "bottom",
-        margin = { 1, 0, 1, 0 },
         padding = { 1, 2, 1, 2 },
         winblend = 0,
         zindex = 1000,
