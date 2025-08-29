@@ -11,7 +11,11 @@ return {
           package_pending = "➜",
           package_uninstalled = "✗"
         }
-      }
+      },
+      install_root_dir = vim.fn.stdpath("data") .. "/mason",
+      PATH = "prepend", -- Garantir que ferramentas do Mason tenham prioridade no PATH
+      log_level = vim.log.levels.INFO,
+      max_concurrent_installers = 4,
     },
     build = ":MasonUpdate",
     config = function(_, opts)
@@ -30,7 +34,8 @@ return {
       ensure_installed = {
         "lua_ls", "clangd", "csharp_ls", "html", "cssls", "ts_ls", "jsonls",
         "jdtls", "gopls", "pyright", "marksman", "rust_analyzer", "yamlls"
-      }
+      },
+      automatic_installation = true, -- Instalar automaticamente servidores ausentes
     },
     config = function(_, opts)
       require("mason-lspconfig").setup(opts)
