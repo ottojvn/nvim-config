@@ -59,18 +59,21 @@ return {
       require("neodev").setup({})
       
       -- Configurar handlers globais para o LSP
-      if package.loaded["utils.lsp_handlers"] then
-        require("utils.lsp_handlers").enhance_handlers()
+      local lsp_handlers_ok, lsp_handlers = pcall(require, "utils.lsp_handlers")
+      if lsp_handlers_ok and lsp_handlers.enhance_handlers then
+        lsp_handlers.enhance_handlers()
       end
       
       -- Configurar gerenciador de logs
-      if package.loaded["utils.lsp_log_manager"] then
-        require("utils.lsp_log_manager").setup()
+      local log_manager_ok, log_manager = pcall(require, "utils.lsp_log_manager")
+      if log_manager_ok and log_manager.setup then
+        log_manager.setup()
       end
       
       -- Configurar filtros de log
-      if package.loaded["utils.lsp_log_filter"] then
-        require("utils.lsp_log_filter").setup()
+      local log_filter_ok, log_filter = pcall(require, "utils.lsp_log_filter")
+      if log_filter_ok and log_filter.setup then
+        log_filter.setup()
       end
 
       -- Diagnósticos
@@ -161,66 +164,71 @@ return {
           end
         end
         
-        print("Aviso: mason-lspconfig não encontrado ou setup_handlers indisponível. Usando configuração manual.")
+        -- Usar vim.notify ao invés de print para melhor consistência
+        if not status_ok then
+          vim.notify("Mason-lspconfig não encontrado. Usando configuração manual dos servidores LSP.", vim.log.levels.WARN)
+        else
+          vim.notify("setup_handlers não disponível no mason-lspconfig. Usando configuração manual.", vim.log.levels.WARN)
+        end
       end
 
-      -- Configuração para Java
+      -- Configuração para Java (simplificada seguindo padrões nvim-jdtls)
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "java",
         callback = function()
-          -- Inicializar configurações Java de forma segura
-          local java_config_ok, java_config = pcall(require, "utils.java_config")
-          if java_config_ok then
-            java_config.setup()
+          -- Carregar configuração JDTLS
+          local jdtls_ok, jdtls_util = pcall(require, "utils.jdtls")
+          if not jdtls_ok then
+            vim.notify("Não foi possível carregar configuração JDTLS", vim.log.levels.WARN)
+            return
           end
           
-          -- Carregar configuração JDTLS de forma segura
-          local jdtls_ok, jdtls_util = pcall(require, "utils.jdtls")
-          if jdtls_ok then
-            local config = jdtls_util.get_config()
+          local config = jdtls_util.get_config()
+          if not config then
+            vim.notify("Não foi possível obter configuração JDTLS válida", vim.log.levels.WARN)
+            return
+          end
+          
+          local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+          
+          -- Iniciar o JDTLS
+          local jdtls_ok, jdtls = pcall(require, "jdtls")
+          if not jdtls_ok then
+            vim.notify("Plugin nvim-jdtls não encontrado", vim.log.levels.WARN)
+            return
+          end
+          
+          -- Mapeamentos específicos para JDTLS (padrão nvim-jdtls)
+          local function map(mode, lhs, rhs, desc)
+            vim.keymap.set(mode, lhs, rhs, { buffer = 0, desc = "Java: " .. desc })
+          end
+          
+          map("n", "<leader>jo", function() jdtls.organize_imports() end, "Organizar imports")
+          map("n", "<leader>jt", function() jdtls.test_class() end, "Testar classe")
+          map("n", "<leader>jn", function() jdtls.test_nearest_method() end, "Testar método")
+          map("n", "<leader>je", function() jdtls.extract_variable() end, "Extrair variável")
+          map("v", "<leader>je", function() jdtls.extract_variable(true) end, "Extrair variável")
+          map("n", "<leader>jc", function() jdtls.extract_constant() end, "Extrair constante")
+          map("v", "<leader>jc", function() jdtls.extract_constant(true) end, "Extrair constante")
+          map("n", "<leader>jf", function() vim.lsp.buf.format({ async = true }) end, "Formatar código")
+          
+          -- Iniciar o JDTLS com tratamento de erro simples
+          local start_ok, start_err = pcall(function()
+            jdtls.start_or_attach(config)
+          end)
+          
+          if not start_ok then
+            local error_msg = "Erro ao iniciar JDTLS: " .. tostring(start_err)
+            vim.notify(error_msg, vim.log.levels.ERROR)
             
-            -- Verificar se a configuração é válida
-            if not config then
-              vim.notify("Não foi possível obter configuração JDTLS válida", vim.log.levels.WARN)
-              return
-            end
-            
-            -- Iniciar o JDTLS
-            local jdtls_ok, jdtls = pcall(require, "jdtls")
-            if jdtls_ok then
-              -- Mapeamentos específicos para JDTLS
-              local function map(mode, lhs, rhs, desc)
-                vim.keymap.set(mode, lhs, rhs, { buffer = 0, desc = "Java: " .. desc })
-              end
-              
-              -- Mapeamentos específicos para JDTLS
-              map("n", "<leader>jo", function() jdtls.organize_imports() end, "Organizar imports")
-              map("n", "<leader>jt", function() jdtls.test_class() end, "Testar classe")
-              map("n", "<leader>jn", function() jdtls.test_nearest_method() end, "Testar método")
-              map("n", "<leader>je", function() jdtls.extract_variable() end, "Extrair variável")
-              map("v", "<leader>je", function() jdtls.extract_variable(true) end, "Extrair variável")
-              map("n", "<leader>jc", function() jdtls.extract_constant() end, "Extrair constante")
-              map("v", "<leader>jc", function() jdtls.extract_constant(true) end, "Extrair constante")
-              map("n", "<leader>jf", function() vim.lsp.buf.format({ async = true }) end, "Formatar código")
-              map("n", "<leader>jl", function() 
-                if java_config_ok then 
-                  java_config.clean_logs() 
-                end 
-              end, "Limpar logs")
-              
-              -- Iniciar o JDTLS com tratamento de erro
-              local start_ok, start_err = pcall(function()
-                jdtls.start_or_attach(config)
-              end)
-              
-              if not start_ok then
-                vim.notify("Erro ao iniciar JDTLS: " .. start_err, vim.log.levels.ERROR)
-              end
-            else
-              vim.notify("Plugin nvim-jdtls não encontrado", vim.log.levels.WARN)
+            -- Sugestões básicas para erros comuns
+            if string.find(tostring(start_err), "exit code 13") then
+              vim.notify("Sugestão: Verifique a versão do Java. Tente :MasonInstall jdtls para reinstalar.", vim.log.levels.INFO)
+            elseif string.find(tostring(start_err), "launcher") then
+              vim.notify("Sugestão: Execute :MasonInstall jdtls para instalar o JDTLS.", vim.log.levels.INFO)
             end
           else
-            vim.notify("Não foi possível carregar configuração JDTLS", vim.log.levels.WARN)
+            vim.notify("JDTLS iniciado com sucesso para " .. project_name, vim.log.levels.INFO)
           end
         end,
       })
