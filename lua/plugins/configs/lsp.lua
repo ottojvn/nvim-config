@@ -211,13 +211,11 @@ return {
         end
       end
 
-      -- Configuração para Java (simplificada seguindo recomendações nvim-jdtls README)
-      -- Usando abordagem via lsp.config conforme documentação oficial
-      vim.lsp.config("jdtls", {
+      -- Configuração para Java usando lspconfig (mais compatível)
+      lspconfig.jdtls.setup({
+        capabilities = capabilities,
         cmd = { "jdtls" }, -- Requer jdtls no PATH (instalado via Mason)
-        root_dir = function(fname)
-          return vim.fs.root(fname, {'gradlew', '.git', 'mvnw', 'pom.xml', 'build.gradle'})
-        end,
+        root_dir = lspconfig.util.root_pattern('gradlew', '.git', 'mvnw', 'pom.xml', 'build.gradle'),
         settings = {
           java = {
             eclipse = { downloadSources = true },
@@ -232,9 +230,6 @@ return {
           bundles = {}
         }
       })
-      
-      -- Habilitar jdtls para arquivos Java
-      vim.lsp.enable("jdtls")
       
       -- Mapeamentos específicos para JDTLS quando anexado
       vim.api.nvim_create_autocmd("LspAttach", {
