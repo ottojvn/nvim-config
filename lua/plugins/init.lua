@@ -70,7 +70,4 @@ return {
 	{ import = "plugins.configs.git" },
 
 	{ import = "plugins.configs.conform" },
-
-	-- Extensões Java
-	{ import = "plugins.configs.java_extensions" },
 }
