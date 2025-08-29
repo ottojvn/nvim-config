@@ -166,9 +166,9 @@ return {
         
         -- Usar vim.notify ao invés de print para melhor consistência
         if not status_ok then
-          vim.notify("Mason-lspconfig não encontrado. Usando configuração manual dos servidores LSP.", vim.log.levels.WARN)
+          vim.notify("Mason-lspconfig não encontrado. Usando configuração manual dos servidores LSP.", vim.log.levels.DEBUG)
         else
-          vim.notify("setup_handlers não disponível no mason-lspconfig. Usando configuração manual.", vim.log.levels.WARN)
+          vim.notify("setup_handlers não disponível no mason-lspconfig. Usando configuração manual.", vim.log.levels.DEBUG)
         end
       end
 
@@ -228,7 +228,7 @@ return {
               vim.notify("Sugestão: Execute :MasonInstall jdtls para instalar o JDTLS.", vim.log.levels.INFO)
             end
           else
-            vim.notify("JDTLS iniciado com sucesso para " .. project_name, vim.log.levels.INFO)
+            vim.notify("JDTLS iniciado com sucesso para " .. project_name, vim.log.levels.DEBUG)
           end
         end,
       })
