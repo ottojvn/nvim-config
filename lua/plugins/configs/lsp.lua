@@ -16,10 +16,30 @@ return {
       PATH = "prepend", -- Garantir que ferramentas do Mason tenham prioridade no PATH
       log_level = vim.log.levels.INFO,
       max_concurrent_installers = 4,
+      -- Configuração para reduzir warnings desnecessários no checkhealth
+      -- Os warnings sobre luarocks, ruby, php, composer e julia são informativos
+      -- e apenas indicam que essas ferramentas estão disponíveis para uso opcional
+      providers = {
+        "mason.providers.registry-api",
+        "mason.providers.client",
+      },
     },
     build = ":MasonUpdate",
     config = function(_, opts)
       require("mason").setup(opts)
+      
+      -- Adicionar comando para instalar dependências opcionais do Rust se necessário
+      vim.api.nvim_create_user_command("MasonInstallRustDeps", function()
+        vim.notify("Configurando Rust toolchain para rust_analyzer...", vim.log.levels.INFO)
+        vim.fn.system("rustup default stable")
+        local result = vim.fn.system("rustup show")
+        if vim.v.shell_error == 0 then
+          vim.notify("Rust toolchain configurado com sucesso!", vim.log.levels.INFO)
+          vim.notify("Agora você pode reinstalar rust_analyzer se necessário: :MasonInstall rust_analyzer", vim.log.levels.INFO)
+        else
+          vim.notify("Erro ao configurar Rust toolchain. Verifique se rustup está instalado.", vim.log.levels.ERROR)
+        end
+      end, { desc = "Configurar dependências Rust para mason" })
     end
   },
 
@@ -31,9 +51,23 @@ return {
       "neovim/nvim-lspconfig"
     },
     opts = {
+      -- Lista de servidores LSP essenciais para instalar automaticamente
+      -- rust_analyzer foi removido da lista automática devido a dependências do cargo
+      -- Use :MasonInstallRustDeps e depois :MasonInstall rust_analyzer se precisar de Rust
       ensure_installed = {
-        "lua_ls", "clangd", "csharp_ls", "html", "cssls", "ts_ls", "jsonls",
-        "jdtls", "gopls", "pyright", "marksman", "rust_analyzer", "yamlls"
+        "lua_ls",      -- Lua (Neovim configuration)
+        "clangd",      -- C/C++
+        "csharp_ls",   -- C#
+        "html",        -- HTML
+        "cssls",       -- CSS
+        "ts_ls",       -- TypeScript/JavaScript  
+        "jsonls",      -- JSON
+        "jdtls",       -- Java (configurado especialmente)
+        "gopls",       -- Go
+        "pyright",     -- Python
+        "marksman",    -- Markdown
+        "yamlls"       -- YAML
+        -- rust_analyzer pode ser instalado manualmente após configurar Rust toolchain
       },
       automatic_installation = true, -- Instalar automaticamente servidores ausentes
     },
