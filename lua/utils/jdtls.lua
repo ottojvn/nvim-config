@@ -106,19 +106,19 @@ function M.get_config()
     table.insert(java_opts, "java.base/java.net=ALL-UNNAMED")
   end
   
-  -- Adicionar flags específicas para Java 21+ (incubator modules)
-  if is_java_21_plus then
-    table.insert(java_opts, "--enable-preview")
-    table.insert(java_opts, "--add-modules")
-    table.insert(java_opts, "jdk.incubator.vector")
-  end
-
   -- Adicionar configurações de log para reduzir mensagens desnecessárias
   table.insert(java_opts, "-Dorg.slf4j.simpleLogger.defaultLogLevel=error")
   table.insert(java_opts, "-Dorg.eclipse.jdt.core.compiler.problem.suppressWarnings=enabled")
   
-  -- Suprimir warnings específicos que causam exit code 13  
+  -- Suprimir warnings específicos que causam exit code 13
+  -- Suprimir especificamente warnings de módulos incubator
   table.insert(java_opts, "-Djdk.incubator.vector.VECTOR_ACCESS_OOB_CHECK=0")
+  
+  -- Adicionar flags para Java 21+ para suprimir warnings sem habilitar módulos incubator
+  if is_java_21_plus then
+    -- Suprimir warnings de módulos incubator sem habilitá-los
+    table.insert(java_opts, "-Xlog:module=off")
+  end
 
     -- Completar as opções
   table.insert(java_opts, "-jar")
